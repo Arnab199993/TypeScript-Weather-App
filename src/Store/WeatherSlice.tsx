@@ -13,7 +13,7 @@ enum STATUSES {
 
 interface WeatherState {
     status: STATUSES;
-    data: any[] | null; // Update this to match the actual structure of your data
+    data: any[] | null;
 }
 
 const initialState: WeatherState = {
