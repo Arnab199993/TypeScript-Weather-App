@@ -5,7 +5,7 @@ import axios from "axios";
 
 const API_KEY = '6a339fc42c59d15624f1a364c4b797ac';
 
-enum STATUSES {
+export enum STATUSES {
     LOADING = "loading",
     IDLE = 'idle',
     ERROR = "error"
