@@ -1,22 +1,16 @@
-
-
 import React, { useState, useEffect } from 'react';
 import WeatherForm from './Component/WeatherForm';
 import Weather from './Component/Weather';
 import './App.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchWeatherData } from './Store/WeatherSlice';
-import { fetchlocationWeatherData } from './Store/CurrentWeatherSlice';
-import { STATUSES } from './Store/CurrentWeatherSlice';
+import { fetchlocationWeatherData } from './Store/WeatherSlice';
+import { STATUSES } from './Store/WeatherSlice';
 interface SearchHistoryItem {
   city: string;
   timestamp: number;
 }
 
-interface WeatherDetails {
-  name: string;
-
-}
 
 
 const App: React.FC = () => {
@@ -24,8 +18,9 @@ const App: React.FC = () => {
   const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>([]);
   const [allCities, setAllCities] = useState<string[]>([]);
   const dispatch = useDispatch();
-  const { data: weatherDetails, status } = useSelector((state) => state.weather);
-  const { data: currentWeatherDetails } = useSelector((state) => state.weatherByLocation)
+  const { weatherData: weatherDetails, status1 } = useSelector((state) => state.weather);
+  const { weatherLocationData: currentWeatherDetails, status2 } = useSelector((state) => state.weather)
+  console.log("currentWeatherDetails", currentWeatherDetails)
   const [currweather, setCurrWeather] = useState("")
 
 
@@ -39,17 +34,20 @@ const App: React.FC = () => {
     }
   };
 
+
   const handleCurrentLocation = async (
     latitude: number,
     longitude: number
   ): Promise<void> => {
+
     try {
       await dispatch(fetchlocationWeatherData({ latitude, longitude }));
-      setCurrWeather(currentWeatherDetails?.name)
+      setCurrWeather(currentWeatherDetails?.name || "")
     } catch (err) {
       console.log(err)
     }
   };
+
 
   useEffect(() => {
     fetchWeatherDataLocal('London', 'metric');
@@ -62,20 +60,24 @@ const App: React.FC = () => {
       setSearchHistory((prevHistory) => [...prevHistory, { city, timestamp: Date.now() }]);
     }
   }, [weatherDetails]);
-  if (status === STATUSES.LOADING) {
+  if (status1 === STATUSES.LOADING) {
     return (
       <div className="loading">Loading...</div>
     )
   }
-  if (status === STATUSES.ERROR) {
+  if (status1 === STATUSES.ERROR) {
     <div className="loading">Error...</div>
   }
   return (
     <div className="container">
       <h1>Weather App</h1>
       <WeatherForm onSearch={fetchWeatherDataLocal} onCurrentLocation={handleCurrentLocation} />
-      {/* {loading && <p className="loading">Loading...</p>}
-      {error && <p className="error">{error}</p>} */}
+      {currentWeatherDetails && (
+        <div>
+          <Weather className="Weather" weatherData={currentWeatherDetails} />
+          <p>{currentWeatherDetails.name}</p>
+        </div>
+      )}
       <Weather className="Weather" weatherData={weatherDetails} />
       <h2>Search History</h2>
       <ul>
@@ -83,7 +85,6 @@ const App: React.FC = () => {
           <li key={index}>{item}</li>
         ))}
       </ul>
-
     </div>
   );
 };
