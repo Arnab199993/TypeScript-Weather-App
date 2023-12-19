@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react';
-
 interface WeatherFormProps {
     onSearch: (city: string, unit: string) => void;
     onCurrentLocation: (latitude: number, longitude: number) => void;
@@ -13,6 +12,7 @@ const WeatherForm: React.FC<WeatherFormProps> = ({ onSearch, onCurrentLocation }
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onSearch(city, unit);
+
     };
 
     const handleCurrentLocation = () => {
@@ -51,3 +51,6 @@ const WeatherForm: React.FC<WeatherFormProps> = ({ onSearch, onCurrentLocation }
 };
 
 export default WeatherForm;
+
+
+
