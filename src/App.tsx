@@ -2,91 +2,109 @@ import React, { useState, useEffect } from 'react';
 import WeatherForm from './Component/WeatherForm';
 import Weather from './Component/Weather';
 import './App.css';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchWeatherData } from './Store/WeatherSlice';
-import { fetchlocationWeatherData } from './Store/WeatherSlice';
-import { STATUSES } from './Store/WeatherSlice';
+import { useGetWeatherDataQuery } from './Store/WeatherQuery';
+import { useGetCurrentLocationDataQuery } from './Store/WeatherQuery';
 interface SearchHistoryItem {
   city: string;
   timestamp: number;
 }
 
 
-
 const App: React.FC = () => {
 
   const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>([]);
   const [allCities, setAllCities] = useState<string[]>([]);
-  const dispatch = useDispatch();
-  const { weatherData: weatherDetails, status1 } = useSelector((state) => state.weather);
-  const { weatherLocationData: currentWeatherDetails, status2 } = useSelector((state) => state.weather)
-  console.log("currentWeatherDetails", currentWeatherDetails)
   const [currweather, setCurrWeather] = useState("")
+  const [city, setCity] = useState("London")
+  const [unit, setUnit] = useState("metric")
+  const [latitude, setLatitude] = useState(0)
+  const [longitude, setLongitude] = useState(0)
+  const { data: weatherData, isLoading, isError, error } = useGetWeatherDataQuery({ city, unit })
+  const { data: currentLocationData } = useGetCurrentLocationDataQuery({ latitude, longitude })
 
 
-  const fetchWeatherDataLocal = async (city: string, unit: string): Promise<void> => {
+
+
+  const fetchWeatherDataLocal = (city: string, unit: string) => {
     setAllCities(prevCities => [...prevCities, city]);
-    try {
+    setCity(city)
+    setUnit(unit)
 
-      await dispatch(fetchWeatherData({ city, unit }));
-    } catch (err) {
-      console.log(err)
-    }
   };
 
 
-  const handleCurrentLocation = async (
+  const handleCurrentLocation = (
     latitude: number,
     longitude: number
-  ): Promise<void> => {
+  ) => {
+    setLatitude(latitude)
+    setLongitude(longitude)
 
-    try {
-      await dispatch(fetchlocationWeatherData({ latitude, longitude }));
-      setCurrWeather(currentWeatherDetails?.name || "")
-    } catch (err) {
-      console.log(err)
-    }
+
   };
 
 
   useEffect(() => {
     fetchWeatherDataLocal('London', 'metric');
-  }, [dispatch]);
+  }, []);
 
   useEffect(() => {
-    console.log("weatherDetails", weatherDetails);
-    if (weatherDetails) {
-      const { name: city } = weatherDetails;
+
+    if (weatherData) {
+      const { name: city } = weatherData
       setSearchHistory((prevHistory) => [...prevHistory, { city, timestamp: Date.now() }]);
     }
-  }, [weatherDetails]);
-  if (status1 === STATUSES.LOADING) {
+  }, ["weatherDetails"]);
+  if (isLoading) {
     return (
-      <div className="loading">Loading...</div>
+      <div>Loading...</div>
     )
   }
-  if (status1 === STATUSES.ERROR) {
-    <div className="loading">Error...</div>
-  }
+  // if (isError) {
+  //   return (
+  //     <div>Something went wrong...</div>
+  //   )
+  // }
   return (
     <div className="container">
-      <h1>Weather App</h1>
+      {/* <h1>Weather App</h1>
       <WeatherForm onSearch={fetchWeatherDataLocal} onCurrentLocation={handleCurrentLocation} />
-      {currentWeatherDetails && (
+      {currentLocationData && (
         <div>
-          <Weather className="Weather" weatherData={currentWeatherDetails} />
-          <p>{currentWeatherDetails.name}</p>
+          <Weather className="Weather" weatherData={currentLocationData} />
+          <p>{currentLocationData.name}</p>
         </div>
       )}
-      <Weather className="Weather" weatherData={weatherDetails} />
+      <Weather className="Weather" weatherData={weatherData} />
       <h2>Search History</h2>
       <ul>
         {allCities.map((item, index) => (
           <li key={index}>{item}</li>
         ))}
-      </ul>
+      </ul> */}
+      {isError ? <div>Something went wrong...</div> : <div>
+        <WeatherForm onSearch={fetchWeatherDataLocal} onCurrentLocation={handleCurrentLocation} />
+        {currentLocationData && (
+          <div>
+            <Weather className="Weather" weatherData={currentLocationData} />
+            <p>{currentLocationData.name}</p>
+          </div>
+        )}
+        <Weather className="Weather" weatherData={weatherData} />
+        <h2>Search History</h2>
+        <ul>
+          {allCities.map((item, index) => (
+            <li key={index}>{item}</li>
+          ))}
+        </ul>
+      </div>}
     </div>
   );
 };
 
 export default App;
+
+
+
+
+

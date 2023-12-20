@@ -33,11 +33,12 @@ const WeatherForm: React.FC<WeatherFormProps> = ({ onSearch, onCurrentLocation }
                     type="text"
                     value={city}
                     onChange={(e) => setCity(e.target.value)}
+                    required
                 />
             </label>
             <label>
                 Unit:
-                <select value={unit} onChange={(e) => setUnit(e.target.value)}>
+                <select value={unit} onChange={(e) => setUnit(e.target.value)} required>
                     <option value="metric">Metric</option>
                     <option value="imperial">Imperial</option>
                 </select>
